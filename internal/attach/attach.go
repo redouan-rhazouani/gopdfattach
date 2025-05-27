@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"time"
 
 	_ "github.com/MarlinKuhn/gopdfattach/internal/xsd"
@@ -22,6 +23,7 @@ import (
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/validate"
+	"github.com/pkg/errors"
 	pdf2 "github.com/trimmer-io/go-xmp/models/pdf"
 	"github.com/trimmer-io/go-xmp/xmp"
 )
@@ -114,17 +116,27 @@ func Attach(zugFeRD io.Reader, pdf io.ReadSeeker, config Config) ([]byte, error)
 
 		doc := xmp.NewDocument()
 
+		if len(metadata) == 0 {
+			log.Println("No metadata found in PDF, creating new XMP document")
+		}
+
 		for _, meta := range metadata {
+			if meta.ParentType != "Catalog" {
+				continue
+			}
+
 			rawMetaXMP, err := io.ReadAll(meta)
 			if err != nil {
-				continue
+				return nil, errors.Wrap(err, "could not read XMP metadata")
 			}
 
 			// XMP metadata manipulation
 			err = xmp.Unmarshal(rawMetaXMP, doc)
-			if err == nil {
-				break
+			if err != nil {
+				return nil, fmt.Errorf("could not unmarshal XMP metadata: %w", err)
 			}
+
+			break
 		}
 
 		info, err := pdf2.MakeModel(doc)

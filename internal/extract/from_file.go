@@ -54,16 +54,20 @@ func FromReader(reader io.ReadSeeker) (*Output, error) {
 	var out Output
 
 	for _, meta := range metadata {
+		if meta.ParentType != "Catalog" {
+			continue
+		}
+
 		rawMetaXMP, err := io.ReadAll(meta)
 		if err != nil {
-			continue
+			return nil, fmt.Errorf("could not read metadata: %w", err)
 		}
 
 		// XMP metadata manipulation
 		var doc xmp.Document
 		err = xmp.Unmarshal(rawMetaXMP, &doc)
 		if err != nil {
-			continue
+			return nil, fmt.Errorf("could not unmarshal XMP metadata: %w", err)
 		}
 
 		makeModel := fx.FindModel(&doc)
