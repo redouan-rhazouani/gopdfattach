@@ -46,6 +46,7 @@ type Config struct {
 	Version          string
 	ConformanceLevel string
 	Creator          string
+	AFRelationship   string
 }
 
 func (c *Config) setDefaults() {
@@ -67,6 +68,10 @@ func (c *Config) setDefaults() {
 
 	if c.Creator == "" {
 		c.Creator = "gopdfattach"
+	}
+
+	if c.AFRelationship == "" {
+		c.AFRelationship = "Alternative"
 	}
 
 	switch c.XmlType {
@@ -221,7 +226,7 @@ func Attach(zugFeRD io.Reader, pdf io.ReadSeeker, config Config) ([]byte, error)
 		ID:       config.FileName,
 		FileName: config.FileName,
 		Desc:     "Factur-X/ZUGFeRD-Rechnung",
-	}, "text/xml")
+	}, "text/xml", config.AFRelationship)
 	if err != nil {
 		return nil, fmt.Errorf("could not add attachment: %w", err)
 	}
@@ -231,7 +236,7 @@ func Attach(zugFeRD io.Reader, pdf io.ReadSeeker, config Config) ([]byte, error)
 	return data.Bytes(), err
 }
 
-func attachFileToPfd(ctx *model.Context, a model.Attachment, mimeType string) error {
+func attachFileToPfd(ctx *model.Context, a model.Attachment, mimeType string, afRelationship string) error {
 	xRefTable := ctx.XRefTable
 	if err := xRefTable.LocateNameTree("EmbeddedFiles", true); err != nil {
 		return err
@@ -282,7 +287,7 @@ func attachFileToPfd(ctx *model.Context, a model.Attachment, mimeType string) er
 		return err
 	}
 
-	d.InsertName("AFRelationship", "Data")
+	d.InsertName("AFRelationship", afRelationship)
 
 	ir, err := xRefTable.IndRefForNewObject(d)
 	if err != nil {

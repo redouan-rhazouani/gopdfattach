@@ -12,6 +12,7 @@ type AttachConfig struct {
 	Version          string // defaults to "1.0" if factur-x, "2p0" if zugferd
 	ConformanceLevel string // defaults to "EN 16931"
 	Creator          string // defaults to "gopdfattach"
+	AFRelationship   string // defaults to "Alternative" (spec-compliant for Factur-X/ZUGFeRD)
 }
 
 func (a *AttachConfig) toConfig() attach.Config {
@@ -25,6 +26,7 @@ func (a *AttachConfig) toConfig() attach.Config {
 		Version:          a.Version,
 		ConformanceLevel: a.ConformanceLevel,
 		Creator:          a.Creator,
+		AFRelationship:   a.AFRelationship,
 	}
 }
 

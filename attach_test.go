@@ -115,3 +115,53 @@ func Test_FacturX(t *testing.T) {
 	assert.Equal(t, config.Version, infos.Version)
 	assert.Equal(t, config.ConformanceLevel, infos.ConformanceLevel)
 }
+
+func TestAttach_WithCustomAFRelationship(t *testing.T) {
+	pdfFile, _ := os.Open("testdata/invoice.pdf")
+	defer pdfFile.Close()
+	xmlFile, _ := os.Open("testdata/factur-x.xml")
+	defer xmlFile.Close()
+
+	config := &AttachConfig{
+		DocumentType:     "INVOICE",
+		FileName:         "factur-x.xml",
+		Version:          "1.0",
+		ConformanceLevel: "EN 16931",
+		AFRelationship:   "Data", // Custom value
+	}
+
+	pdfData, err := AttachFacturX(xmlFile, pdfFile, config)
+	assert.NoError(t, err)
+	assert.NotNil(t, pdfData)
+
+	// Verify the PDF can be extracted successfully
+	xml, infos, err := Extract(bytes.NewReader(pdfData))
+	assert.NoError(t, err)
+	assert.NotNil(t, xml)
+	assert.Equal(t, FileTypeFacturX, infos.FileType)
+}
+
+func TestAttach_WithAlternativeAFRelationship(t *testing.T) {
+	pdfFile, _ := os.Open("testdata/invoice.pdf")
+	defer pdfFile.Close()
+	xmlFile, _ := os.Open("testdata/factur-x.xml")
+	defer xmlFile.Close()
+
+	config := &AttachConfig{
+		DocumentType:     "INVOICE",
+		FileName:         "factur-x.xml",
+		Version:          "1.0",
+		ConformanceLevel: "EN 16931",
+		AFRelationship:   "Alternative", // Spec-compliant value
+	}
+
+	pdfData, err := AttachZUGFeRD(xmlFile, pdfFile, config)
+	assert.NoError(t, err)
+	assert.NotNil(t, pdfData)
+
+	// Verify the PDF can be extracted successfully
+	xml, infos, err := Extract(bytes.NewReader(pdfData))
+	assert.NoError(t, err)
+	assert.NotNil(t, xml)
+	assert.Equal(t, FileTypeZugferd, infos.FileType)
+}

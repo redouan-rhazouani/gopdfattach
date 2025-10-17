@@ -99,8 +99,24 @@ type AttachConfig struct {
     Version          string // defaults to "1.0" if factur-x, "2p0" if zugferd
     ConformanceLevel string // defaults to "EN 16931"
     Creator          string // defaults to "gopdfattach"
+    AFRelationship   string // defaults to "Alternative" (spec-compliant for Factur-X/ZUGFeRD)
 }
 ```
+
+### AFRelationship Field
+
+The `AFRelationship` field specifies how the embedded XML file relates to the PDF document according to the PDF/A-3 specification. 
+
+**Default value**: `"Alternative"` (recommended for Factur-X/ZUGFeRD)
+
+This default follows the Factur-X/ZUGFeRD specification, which states that the embedded XML is an alternative representation of the PDF content (the XML is machine-readable, while the PDF is human-readable, both representing the same invoice).
+
+**Other valid values**:
+- `"Data"` - Additional data (general attachments)
+- `"Source"` - Source file (original source documents)
+- `"Supplement"` - Supplementary information (supporting documents)
+
+For most Factur-X/ZUGFeRD use cases, you should use the default `"Alternative"` value or leave it unset.
 
 ## Return Types
 
