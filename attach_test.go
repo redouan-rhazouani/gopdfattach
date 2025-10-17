@@ -127,7 +127,7 @@ func TestAttach_WithCustomAFRelationship(t *testing.T) {
 		FileName:         "factur-x.xml",
 		Version:          "1.0",
 		ConformanceLevel: "EN 16931",
-		AFRelationship:   "Data", // Custom value
+		AFRelationship:   AFData, // Custom value
 	}
 
 	pdfData, err := AttachFacturX(xmlFile, pdfFile, config)
@@ -152,7 +152,7 @@ func TestAttach_WithAlternativeAFRelationship(t *testing.T) {
 		FileName:         "factur-x.xml",
 		Version:          "1.0",
 		ConformanceLevel: "EN 16931",
-		AFRelationship:   "Alternative", // Spec-compliant value
+		AFRelationship:   AFAlternative, // Spec-compliant value
 	}
 
 	pdfData, err := AttachZUGFeRD(xmlFile, pdfFile, config)
